@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ScamGuard – Phishing Shield",
+  "name": "URL Monitor – Phishing & Scam Shield",
   "version": "0.2.0",
-  "description": "Community-powered protection against phishing, scams, and malicious websites. Check every site you visit against the blocklist.",
+  "description": "Protects users from zero-day phishing and job scam websites by checking visited domains against a community-maintained blocklist.",
   "permissions": [
     "storage",
     "unlimitedStorage",

@@ -1,4 +1,4 @@
-# Contributing to URL Monitor
+# Contributing to ScamGuard
 
 Thanks for your interest in contributing! This guide covers the basics.
 

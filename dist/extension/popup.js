@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  popup.js  –  ScamGuard popup
+//  popup.js  –  URL Monitor popup
 // ─────────────────────────────────────────────
 //  Domain info is always shown. Clicking Report / Vouch opens
 //  the ScamGuard website where auth + bot protection happen.
@@ -95,7 +95,7 @@ btnSync.addEventListener("click", async () => {
       statusBar.textContent = "Sync failed";
     }
   } catch (err) {
-    console.error("[ScamGuard] Sync failed:", err);
+    console.error("[URL Monitor] Sync failed:", err);
     statusBar.textContent = "Sync failed";
   } finally {
     btnSync.classList.remove("spinning");
@@ -204,7 +204,7 @@ async function lookupDomainOnServer(domain) {
     try {
       data = JSON.parse(result.responseBody || "{}");
     } catch {
-      console.warn("[ScamGuard] Invalid JSON from server lookup");
+      console.warn("[URL Monitor] Invalid JSON from server lookup");
       return null;
     }
     if (data.ok && data.found) {

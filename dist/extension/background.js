@@ -178,7 +178,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     try {
       await updateBadge(tabId, tab.url);
     } catch (err) {
-      console.warn(`[ScamGuard] Badge update failed for tab ${tabId}:`, err);
+      console.warn(`[URL Monitor] Badge update failed for tab ${tabId}:`, err);
     }
   }
 });
@@ -202,15 +202,15 @@ async function syncLists() {
     ]);
 
     if (blocklistOk.status === "rejected") {
-      console.warn("[ScamGuard] Storage blocklist unavailable, trying function fallback…");
+      console.warn("[URL Monitor] Storage blocklist unavailable, trying function fallback…");
       await syncBlocklistFallback();
     }
 
     if (trustedOk.status === "rejected") {
-      console.warn("[ScamGuard] Trusted list download failed:", trustedOk.reason?.message);
+      console.warn("[URL Monitor] Trusted list download failed:", trustedOk.reason?.message);
     }
   } catch (err) {
-    console.error("[ScamGuard] List sync failed:", err);
+    console.error("[URL Monitor] List sync failed:", err);
   }
 
   // Refresh badge on the active tab after sync
@@ -241,7 +241,7 @@ async function syncBlocklistFromStorage() {
   await umSetMeta("blocklist_buildTime", data.buildTime);
 
   console.log(
-    `[ScamGuard] Blocklist synced from Storage – ${blocked.length} blocked, ${reported.length} suspicious (${data.count} total).`
+    `[URL Monitor] Blocklist synced from Storage – ${blocked.length} blocked, ${reported.length} suspicious (${data.count} total).`
   );
 }
 
@@ -258,7 +258,7 @@ async function syncTrustedFromStorage() {
   }
   await umSetMeta("trusted_buildTime", data.buildTime);
 
-  console.log(`[ScamGuard] Trusted list synced – ${data.count} domains.`);
+  console.log(`[URL Monitor] Trusted list synced – ${data.count} domains.`);
 }
 
 // ── Download a file from Appwrite Storage ───────────────────────────
@@ -295,7 +295,7 @@ const LIST_SIGNING_PUBLIC_KEY = UM_CONFIG.LIST_SIGNING_PUBLIC_KEY;
 
 async function verifySignature(json, signatureB64) {
   if (!LIST_SIGNING_PUBLIC_KEY) {
-    console.error('[ScamGuard] Signature verification key not configured — rejecting list.');
+    console.error('[URL Monitor] Signature verification key not configured — rejecting list.');
     return false;
   }
 
@@ -312,7 +312,7 @@ async function verifySignature(json, signatureB64) {
       { name: "ECDSA", hash: "SHA-256" }, pubKey, rawSig, dataBytes
     );
   } catch (err) {
-    console.error("[ScamGuard] Signature verification error:", err);
+    console.error("[URL Monitor] Signature verification error:", err);
     return false;
   }
 }
@@ -349,7 +349,7 @@ function derToRaw(der) {
 async function syncBlocklistFallback() {
   // If a signing key is configured, refuse unsigned data for integrity
   if (LIST_SIGNING_PUBLIC_KEY) {
-    console.warn("[ScamGuard] Fallback sync skipped — function responses cannot be signature-verified. Lists will update on next signed sync.");
+    console.warn("[URL Monitor] Fallback sync skipped — function responses cannot be signature-verified. Lists will update on next signed sync.");
     return;
   }
   try {
@@ -387,7 +387,7 @@ async function syncBlocklistFallback() {
       suspiciousDomains: reported,
     });
     console.log(
-      `[ScamGuard] Blocklist synced via fallback – ${blocked.length} blocked, ${reported.length} suspicious.`
+      `[URL Monitor] Blocklist synced via fallback – ${blocked.length} blocked, ${reported.length} suspicious.`
     );
   } catch (err) {
     console.error("[URL Monitor] Fallback sync also failed:", err);

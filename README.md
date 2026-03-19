@@ -1,6 +1,6 @@
-# URL Monitor – Phishing & Scam Shield
+# ScamGuard – Community Phishing Shield
 
-A Chrome extension that protects users from zero-day phishing and scam websites using a community-maintained blocklist backed by [Appwrite Cloud](https://appwrite.io/).
+A Chrome extension that protects users from phishing and scam websites using a community-maintained blocklist backed by [Appwrite Cloud](https://appwrite.io/).
 
 Users can **report** suspicious domains and **vouch** for safe ones. The extension checks every page you visit against the community list and shows a warning banner on known-bad sites.
 
