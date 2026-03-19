@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://nyc.cloud.appwrite.io; img-src 'self' data:;">
+  <title>URL Monitor — Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #121212;
+      --bg-card: #1e1e1e;
+      --bg-elevated: #252525;
+      --border: #333;
+      --border-soft: #2a2a2a;
+      --text: #e0e0e0;
+      --text-heading: #fff;
+      --text-muted: #888;
+      --text-label: #aaa;
+      --hr: #2a2a2a;
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5f5;
+        --bg-card: #ffffff;
+        --bg-elevated: #f0f0f0;
+        --border: #d0d0d0;
+        --border-soft: #e0e0e0;
+        --text: #1a1a1a;
+        --text-heading: #111;
+        --text-muted: #666;
+        --text-label: #555;
+        --hr: #e0e0e0;
+        color-scheme: light;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .header h1 {
+      font-size: 20px;
+      color: var(--text-heading);
+      font-weight: 700;
+    }
+    .header .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .header .back-link:hover { color: var(--text); }
+
+    /* ── Section cards ─────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 14px;
+      color: var(--text-heading);
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+    .card-row + .card-row {
+      border-top: 1px solid var(--hr);
+    }
+    .card-row-label {
+      font-size: 13px;
+      color: var(--text);
+    }
+    .card-row-value {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-ok {
+      background: #1b5e20;
+      color: #a5d6a7;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-warn {
+      background: #4a3800;
+      color: #ffd54f;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-off {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── Form elements ─────────────────────── */
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-label);
+      margin-bottom: 4px;
+    }
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    input:focus { border-color: #4a9eff; }
+
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #4a9eff; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #3a8eef; }
+    .btn-danger { background: #d32f2f; color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #b71c1c; }
+    .btn-success { background: #2e7d32; color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #1b5e20; }
+    .btn-outline {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover:not(:disabled) { background: var(--bg-elevated); }
+
+    .msg {
+      font-size: 12px;
+      min-height: 18px;
+      margin-top: 8px;
+    }
+    .text-green { color: #66bb6a; }
+    .text-red   { color: #ef5350; }
+    .text-yellow { color: #ffa726; }
+
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* ── Collapsible sections ──────────────── */
+    .collapse-content {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--hr);
+    }
+    .collapse-content.open { display: block; }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: #4a9eff;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .btn-link:hover { color: #82bfff; }
+
+    /* ── MFA setup ─────────────────────────── */
+    .qr-container {
+      text-align: center;
+      margin: 12px 0;
+    }
+    .qr-container img {
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+    }
+    .secret-display {
+      font-family: 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      background: var(--bg-elevated);
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-align: center;
+      margin: 8px 0;
+      letter-spacing: 2px;
+      color: var(--text-heading);
+      word-break: break-all;
+    }
+    .mfa-code-input {
+      text-align: center;
+      font-size: 20px;
+      letter-spacing: 8px;
+      font-family: 'SF Mono', Menlo, monospace;
+    }
+
+    /* ── Not signed in ─────────────────────── */
+    .not-signed-in {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .not-signed-in p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Display preferences ────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+    .toggle-row + .toggle-row {
+      border-top: 1px solid var(--hr);
+    }
+    .toggle-label {
+      font-size: 13px;
+      color: var(--text);
+    }
+    .toggle-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0; width: 0; height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 2px;
+      bottom: 2px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: #4a9eff;
+      border-color: #4a9eff;
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(18px);
+      background: #fff;
+    }
+    .color-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .color-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .color-item label {
+      font-size: 12px;
+      color: var(--text-label);
+      margin: 0;
+      flex: 1;
+    }
+    .color-item input[type="color"] {
+      width: 32px;
+      height: 26px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      padding: 1px;
+    }
+    .preset-buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .preset-buttons button {
+      font-size: 11px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .preset-buttons button:hover { background: var(--border); }
+    .preset-buttons button.active {
+      border-color: #4a9eff;
+      color: #4a9eff;
+    }
+    .color-preview {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      align-items: center;
+    }
+    .color-preview .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+    }
+    .color-preview span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ── Danger zone ───────────────────────── */
+    .danger-zone {
+      border-color: #b71c1c;
+    }
+    .danger-zone h2 { color: #ef5350; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚙ Settings</h1>
+    </div>
+
+    <!-- ═══ Display Preferences (always visible, no auth needed) ═══ -->
+    <div class="card">
+      <h2>🎨 Display Preferences</h2>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Show warning banners</div>
+          <div class="toggle-desc">Inject a banner on reported/blocked sites</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="pref-banner" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Badge dot on icon</div>
+          <div class="toggle-desc">Color dot on extension icon for site status</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="pref-badge" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--hr)">
+        <div class="toggle-label" style="margin-bottom:6px">Color scheme</div>
+        <div class="preset-buttons" id="color-presets">
+          <button data-preset="default" class="active">Default</button>
+          <button data-preset="colorblind">Colorblind-friendly</button>
+          <button data-preset="custom">Custom</button>
+        </div>
+
+        <div class="color-preview" id="color-preview">
+          <div class="swatch" id="swatch-blocked"></div><span>Blocked</span>
+          <div class="swatch" id="swatch-reported"></div><span>Reported</span>
+          <div class="swatch" id="swatch-trusted"></div><span>Trusted</span>
+          <div class="swatch" id="swatch-verified"></div><span>Verified</span>
+        </div>
+
+        <div id="custom-colors" class="hidden">
+          <div class="color-grid">
+            <div class="color-item">
+              <label for="color-blocked">Blocked</label>
+              <input type="color" id="color-blocked" value="#d32f2f">
+            </div>
+            <div class="color-item">
+              <label for="color-reported">Reported</label>
+              <input type="color" id="color-reported" value="#e65100">
+            </div>
+            <div class="color-item">
+              <label for="color-trusted">Trusted</label>
+              <input type="color" id="color-trusted" value="#4caf50">
+            </div>
+            <div class="color-item">
+              <label for="color-verified">Verified</label>
+              <input type="color" id="color-verified" value="#2e7d32">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="display-msg" class="msg"></div>
+    </div>
+
+    <!-- ═══ Not signed in ═══ -->
+    <div id="not-signed-in" class="not-signed-in hidden">
+      <p>Sign in from the extension popup to manage your account settings.</p>
+    </div>
+
+    <!-- ═══ Account info ═══ -->
+    <div id="settings-content" class="hidden">
+
+      <div class="card">
+        <h2>👤 Account</h2>
+        <div class="card-row">
+          <span class="card-row-label">Email</span>
+          <span class="card-row-value" id="account-email">—</span>
+        </div>
+        <div class="card-row">
+          <span class="card-row-label">Email verified</span>
+          <span class="card-row-value" id="email-verified-status">—</span>
+        </div>
+        <div class="card-row">
+          <span class="card-row-label">MFA</span>
+          <span class="card-row-value" id="mfa-status">—</span>
+        </div>
+        <div class="card-row">
+          <span class="card-row-label">Member since</span>
+          <span class="card-row-value" id="account-created">—</span>
+        </div>
+      </div>
+
+      <!-- ═══ Email verification ═══ -->
+      <div class="card hidden" id="verify-email-card">
+        <h2>📧 Verify Email</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+          You need to verify your email before you can vote on domains.
+        </p>
+        <button id="btn-send-verification" class="btn btn-primary">Send Verification Email</button>
+        <div id="verify-email-msg" class="msg"></div>
+      </div>
+
+      <!-- ═══ Change password ═══ -->
+      <div class="card">
+        <h2>🔑 Change Password</h2>
+        <div class="form-group">
+          <label for="current-password">Current password</label>
+          <input type="password" id="current-password" autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label for="new-password">New password</label>
+          <input type="password" id="new-password" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirm new password</label>
+          <input type="password" id="confirm-password" autocomplete="new-password">
+        </div>
+        <div class="form-actions">
+          <button id="btn-change-password" class="btn btn-primary">Update Password</button>
+        </div>
+        <div id="password-msg" class="msg"></div>
+      </div>
+
+      <!-- ═══ Two-Factor Authentication ═══ -->
+      <div class="card">
+        <h2>🛡 Two-Factor Authentication</h2>
+        <div id="mfa-not-enabled">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+            Add an extra layer of security to your account with a TOTP authenticator app.
+          </p>
+          <button id="btn-setup-mfa" class="btn btn-success">Enable MFA</button>
+        </div>
+
+        <div id="mfa-enabled" class="hidden">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+            MFA is active. Your account requires a 6-digit code from your authenticator app on each login.
+          </p>
+          <button id="btn-disable-mfa" class="btn btn-outline">Disable MFA</button>
+        </div>
+
+        <!-- MFA setup flow -->
+        <div id="mfa-setup-flow" class="collapse-content">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+            <strong>Step 1:</strong> Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+          </p>
+          <div class="qr-container">
+            <canvas id="mfa-qr-canvas" width="180" height="180" style="border-radius:8px"></canvas>
+          </div>
+          <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-align:center">Or enter this secret manually:</p>
+          <div class="secret-display" id="mfa-secret">—</div>
+
+          <p style="font-size:12px;color:var(--text-muted);margin-top:14px;margin-bottom:8px">
+            <strong>Step 2:</strong> Enter the 6-digit code to confirm setup
+          </p>
+          <div class="form-group">
+            <input type="text" id="mfa-setup-code" class="mfa-code-input" placeholder="000000" maxlength="6" autocomplete="one-time-code">
+          </div>
+          <div class="form-actions">
+            <button id="btn-confirm-mfa" class="btn btn-success">Verify &amp; Enable</button>
+            <button id="btn-cancel-mfa-setup" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+
+        <!-- MFA disable flow -->
+        <div id="mfa-disable-flow" class="collapse-content">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+            Enter your current 6-digit code to confirm disabling MFA.
+          </p>
+          <div class="form-group">
+            <input type="text" id="mfa-disable-code" class="mfa-code-input" placeholder="000000" maxlength="6" autocomplete="one-time-code">
+          </div>
+          <div class="form-actions">
+            <button id="btn-confirm-disable-mfa" class="btn btn-danger">Disable MFA</button>
+            <button id="btn-cancel-mfa-disable" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+
+        <div id="mfa-msg" class="msg"></div>
+      </div>
+
+      <!-- ═══ Danger zone ═══ -->
+      <div class="card danger-zone">
+        <h2>⚠ Danger Zone</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+          Permanently delete your account and all associated data. This action cannot be undone.
+        </p>
+        <button id="btn-delete-account" class="btn btn-danger">Delete My Account</button>
+        <div id="delete-confirm" class="collapse-content">
+          <p style="font-size:12px;color:#ef5350;margin-bottom:8px">
+            Are you sure? Enter your password and type <strong>DELETE</strong> to confirm.
+          </p>
+          <div class="form-group">
+            <input type="password" id="delete-confirm-password" placeholder="Enter your password" autocomplete="current-password">
+          </div>
+          <div class="form-group">
+            <input type="text" id="delete-confirm-input" placeholder="Type DELETE" autocomplete="off">
+          </div>
+          <div class="form-actions">
+            <button id="btn-confirm-delete" class="btn btn-danger">Permanently Delete Account</button>
+            <button id="btn-cancel-delete" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+        <div id="delete-msg" class="msg"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="qr.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>
