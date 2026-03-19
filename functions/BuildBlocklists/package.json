@@ -1,0 +1,10 @@
+{
+  "name": "url-monitor-build-blocklists",
+  "version": "1.0.0",
+  "description": "Compiles domain data into JSON files for extension sync",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^14.1.0"
+  }
+}

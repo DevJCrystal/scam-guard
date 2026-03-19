@@ -1,0 +1,10 @@
+{
+  "name": "url-monitor-sync-trusted-domains",
+  "version": "1.0.0",
+  "description": "Daily import of Tranco top-1000 domains into trusted list",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^14.1.0"
+  }
+}

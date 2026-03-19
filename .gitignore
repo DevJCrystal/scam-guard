@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.tar.gz
+
+# Site (private — hosted separately)
+sites/
+
+# Admin scripts (not needed by contributors)
+scripts/
+
+# Appwrite deployment config (project-specific)
+appwrite.config.json

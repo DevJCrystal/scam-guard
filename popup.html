@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://nyc.cloud.appwrite.io; img-src 'self' data:;">
+  <title>URL Monitor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #121212;
+      --bg-card: #1e1e1e;
+      --bg-elevated: #252525;
+      --border: #333;
+      --border-soft: #2a2a2a;
+      --text: #e0e0e0;
+      --text-heading: #fff;
+      --text-muted: #888;
+      --text-label: #aaa;
+      --hr: #2a2a2a;
+      --badge-unknown-bg: #333;
+      --badge-unknown-text: #888;
+      --status-ok-bg: #1b5e20;
+      --status-ok-text: #a5d6a7;
+      --lookalike-bg: #4a1500;
+      --lookalike-border: #e65100;
+      --lookalike-text: #ffab91;
+      --vote-report-bg: #4a1500;
+      --vote-report-text: #ffab91;
+      --vote-vouch-bg: #1b5e20;
+      --vote-vouch-text: #a5d6a7;
+      --footer: #555;
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5f5;
+        --bg-card: #ffffff;
+        --bg-elevated: #f0f0f0;
+        --border: #d0d0d0;
+        --border-soft: #e0e0e0;
+        --text: #1a1a1a;
+        --text-heading: #111;
+        --text-muted: #666;
+        --text-label: #555;
+        --hr: #e0e0e0;
+        --badge-unknown-bg: #e0e0e0;
+        --badge-unknown-text: #666;
+        --status-ok-bg: #c8e6c9;
+        --status-ok-text: #1b5e20;
+        --lookalike-bg: #fff3e0;
+        --lookalike-border: #e65100;
+        --lookalike-text: #bf360c;
+        --vote-report-bg: #ffccbc;
+        --vote-report-text: #bf360c;
+        --vote-vouch-bg: #c8e6c9;
+        --vote-vouch-text: #1b5e20;
+        --footer: #999;
+        color-scheme: light;
+      }
+      .pill-pending { background: #fff3e0; color: #e65100; }
+    }
+    body {
+      width: 360px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    /* ── Header ────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-left h1 {
+      font-size: 15px;
+      color: var(--text-heading);
+      font-weight: 700;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+      width: auto;
+      line-height: 1;
+    }
+    .btn-icon:hover { color: var(--text); background: var(--bg-elevated); }
+    .btn-icon.spinning { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* ── Domain hero card ──────────────────── */
+    .domain-hero {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .domain-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-heading);
+      word-break: break-all;
+      margin-bottom: 8px;
+    }
+    .domain-name.empty { color: var(--text-muted); font-weight: 400; }
+    .trust-age {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .trust-age.hidden { display: none; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .pill-blocked   { background: #b71c1c; color: #fff; }
+    .pill-reported  { background: #e65100; color: #fff; }
+    .pill-trusted   { background: #1b5e20; color: #a5d6a7; }
+    .pill-verified  { background: #1565c0; color: #bbdefb; }
+    .pill-known     { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
+    .pill-pending   { background: #4a3800; color: #ffd54f; }
+    .pill-unknown   { background: var(--badge-unknown-bg); color: var(--badge-unknown-text); }
+    .pill-loading   { background: var(--badge-unknown-bg); color: var(--text-muted); }
+    /* ── Stats row ─────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .stat-box {
+      flex: 1;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .lookalike-warn {
+      margin-top: 10px;
+      padding: 6px 10px;
+      background: var(--lookalike-bg);
+      border: 1px solid var(--lookalike-border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--lookalike-text);
+      text-align: left;
+    }
+    /* ── Action buttons ────────────────────── */
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-danger  { background: #d32f2f; color: #fff; }
+    .btn-danger:hover  { background: #b71c1c; }
+    .btn-success { background: #2e7d32; color: #fff; }
+    .btn-success:hover { background: #1b5e20; }
+    .btn-warn { background: #e65100; color: #fff; }
+    .btn-warn:hover { background: #bf360c; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .vote-status {
+      font-size: 11px;
+      text-align: center;
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      display: none;
+    }
+    .vote-status.active { display: block; }
+    .vote-status.voted-report { background: var(--vote-report-bg); color: var(--vote-report-text); }
+    .vote-status.voted-vouch  { background: var(--vote-vouch-bg); color: var(--vote-vouch-text); }
+    /* ── Reason textarea ───────────────────── */
+    .reason-row { margin-bottom: 10px; }
+    .reason-row textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 44px;
+      outline: none;
+    }
+    .reason-row textarea:focus { border-color: #4a9eff; }
+    .reason-row textarea::placeholder { color: var(--text-muted); }
+    #report-msg {
+      font-size: 12px;
+      text-align: center;
+      min-height: 16px;
+      margin-bottom: 6px;
+    }
+    .text-green { color: #66bb6a; }
+    .text-red   { color: #ef5350; }
+    .text-yellow { color: #ffa726; }
+    .btn-link {
+      background: none;
+      color: #4a9eff;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+      border: none;
+      width: auto;
+      padding: 0;
+    }
+    .btn-link:hover { color: #82bfff; }
+    /* ── Footer ────────────────────────────── */
+    .footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--hr);
+    }
+    .footer-bar .status-text {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .footer-bar .user-text {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .footer-bar .user-text button {
+      font-size: 10px;
+    }    /* ── Loading pulse ──────────────────── */
+    .loading-pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .btn-loading {
+      pointer-events: none;
+      position: relative;
+    }
+    .btn-loading::after {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 6px;
+      vertical-align: middle;
+    }    /* ── Hidden helper ─────────────────────── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Header ═══ -->
+  <div class="header">
+    <div class="header-left">
+      <h1>URL Monitor</h1>
+    </div>
+    <div class="header-right">
+      <button id="btn-sync" class="btn-icon" title="Sync lists">🔄</button>
+      <button id="btn-settings" class="btn-icon" title="Settings">⚙</button>
+    </div>
+  </div>
+
+  <!-- ═══ Domain hero (always visible) ═══ -->
+  <div class="domain-hero">
+    <div class="domain-name empty" id="current-domain">—</div>
+    <div id="domain-status"><span class="status-pill pill-loading">Checking…</span></div>
+    <div id="trust-age" class="trust-age hidden"></div>
+    <div class="stats-row hidden" id="stats-row">
+      <div class="stat-box"><div class="stat-value" id="stat-reports">0</div><div class="stat-label">Reports</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-vouches">0</div><div class="stat-label">Vouches</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-risk">—</div><div class="stat-label">Risk</div></div>
+    </div>
+    <div id="lookalike-warn" class="lookalike-warn hidden"></div>
+  </div>
+
+  <!-- ═══ Vote actions ═══ -->
+  <div id="vote-status" class="vote-status"></div>
+  <div id="report-msg"></div>
+  <div class="actions" id="vote-buttons-standard">
+    <button id="btn-report" class="btn-danger">⚠ Report</button>
+    <button id="btn-vouch" class="btn-success">✓ Vouch</button>
+  </div>
+  <div class="actions hidden" id="vote-buttons-verified">
+    <button id="btn-reeval" class="btn-warn">🔍 Request Re-evaluation</button>
+  </div>
+
+  <!-- ═══ Footer ═══ -->
+  <div class="footer-bar">
+    <span class="status-text" id="status-bar">—</span>
+    <span class="user-text" id="user-area">
+      <a href="https://sg.crystaljake.com" target="_blank" class="btn-link" style="font-size:10px">ScamGuard Web</a>
+    </span>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="shared.js"></script>
+  <script src="db.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

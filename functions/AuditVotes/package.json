@@ -1,0 +1,10 @@
+{
+  "name": "url-monitor-audit-votes",
+  "version": "1.0.0",
+  "description": "Background audit of vote pool — flags suspicious patterns and recalculates domain statuses",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^14.1.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "url-monitor-fetch-blocklist",
+  "version": "1.0.0",
+  "description": "Single-domain lookup and bulk blocklist fetch",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^14.1.0"
+  }
+}
