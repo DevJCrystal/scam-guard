@@ -12,6 +12,7 @@ const SITE_URL = UM_CONFIG.SITE_URL;
 // ── DOM refs ────────────────────────────────────────────────────────
 const reportMsgEl     = document.getElementById("report-msg");
 const btnSync         = document.getElementById("btn-sync");
+const btnGithub       = document.getElementById("btn-github");
 const btnSettings     = document.getElementById("btn-settings");
 const btnReport       = document.getElementById("btn-report");
 const btnVouch        = document.getElementById("btn-vouch");
@@ -101,6 +102,10 @@ btnSync.addEventListener("click", async () => {
     btnSync.classList.remove("spinning");
     btnSync.disabled = false;
   }
+});
+
+btnGithub.addEventListener("click", () => {
+  chrome.tabs.create({ url: "https://github.com/DevJCrystal/scam-guard" });
 });
 
 btnSettings.addEventListener("click", () => {
