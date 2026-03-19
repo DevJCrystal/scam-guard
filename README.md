@@ -210,4 +210,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-[MIT](LICENSE)
+[GNU GPL v3](LICENSE)
