@@ -24,6 +24,7 @@ const QUALIFIED_VOTER_MIN_DOMAINS = +(process.env.QUALIFIED_VOTER_MIN_DOMAINS ||
 const MAX_ACCOUNTS_PER_UNKNOWN_DOMAIN = +(process.env.MAX_ACCOUNTS_PER_UNKNOWN_DOMAIN || 5);
 const LOOKALIKE_SIMILARITY_MIN = +(process.env.LOOKALIKE_SIMILARITY_MIN || 0.75);
 const ACCOUNT_MIN_AGE_MS = +(process.env.ACCOUNT_MIN_AGE_MS || 24 * 60 * 60 * 1000);
+const ALLOWED_ACTIONS = new Set(['report', 'vouch', 're-evaluate']);
 
 export default async ({ req, res, log, error }) => {
   if (req.method !== 'POST') {
@@ -41,6 +42,10 @@ export default async ({ req, res, log, error }) => {
 
   if (!domain || typeof domain !== 'string') {
     return res.json({ ok: false, message: '"domain" is required' }, 400);
+  }
+
+  if (!action || typeof action !== 'string' || !ALLOWED_ACTIONS.has(action)) {
+    return res.json({ ok: false, message: 'Invalid vote action' }, 400);
   }
 
   // Basic domain validation
@@ -203,11 +208,11 @@ export default async ({ req, res, log, error }) => {
       }
     }
 
-    // 1b. Check if this voter is "qualified" (voted on 3+ different domains)
-    const isQualified = await isQualifiedVoter(databases, userId);
-
-    // 2. Server-side lookalike detection (never trust client-supplied score)
-    const lookalike = await detectLookalike(databases, cleanDomain);
+    // 1b + 2. Run independent checks in parallel to cut response latency
+    const [isQualified, lookalike] = await Promise.all([
+      isQualifiedVoter(databases, userId),
+      detectLookalike(databases, cleanDomain),
+    ]);
 
     // 3. Update the domain record with new vote counts
     const domainResult = await updateDomainVotes(
@@ -219,7 +224,7 @@ export default async ({ req, res, log, error }) => {
     if (domainResult.statusChanged && BUILD_BLOCKLISTS_ID) {
       try {
         const functions = new Functions(client);
-        await functions.createExecution(BUILD_BLOCKLISTS_ID, '', false);
+        await functions.createExecution(BUILD_BLOCKLISTS_ID, '', true);
         log(`Triggered BuildBlocklists rebuild (status → ${domainResult.status})`);
       } catch (rebuildErr) {
         log(`BuildBlocklists trigger failed (non-fatal): ${rebuildErr.message}`);
