@@ -53,21 +53,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadUserVoteStatus();
 });
 
-// ── Open website for voting ─────────────────────────────────────────
-let voteWindowPending = false;
+// ── Vote iframe refs ────────────────────────────────────────────────
+const voteIframeWrap  = document.getElementById("vote-iframe-wrap");
+const voteIframe      = document.getElementById("vote-iframe");
+const voteIframeTitle = document.getElementById("vote-iframe-title");
+const voteIframeClose = document.getElementById("vote-iframe-close");
+
 function openVotePage(action) {
-  if (voteWindowPending || !currentTabHostname) {
-    if (!currentTabHostname) showReportMsg("Cannot determine current site.", "text-red");
+  if (!currentTabHostname) {
+    showReportMsg("Cannot determine current site.", "text-red");
     return;
   }
-  voteWindowPending = true;
   const extId = chrome.runtime.id;
   const url = `${SITE_URL}/vote?domain=${encodeURIComponent(currentTabHostname)}&action=${encodeURIComponent(action)}&ext=${encodeURIComponent(extId)}&popup=1`;
-  chrome.windows.create({ url, type: "popup", width: 460, height: 520 })
-    .finally(() => { voteWindowPending = false; });
+  voteIframeTitle.textContent = action === 'report' ? 'Report Domain' : 'Vouch For Domain';
+  voteIframe.src = url;
+  voteIframeWrap.classList.add("active");
 }
 
-// ── Listen for vote results from the website (via background.js) ────
+function closeVoteIframe() {
+  voteIframeWrap.classList.remove("active");
+  voteIframe.src = "about:blank";
+}
+
+voteIframeClose.addEventListener("click", closeVoteIframe);
+
+// ── Listen for vote results from the iframe (postMessage) ───────────
+window.addEventListener("message", (event) => {
+  if (!event.origin.startsWith(SITE_URL)) return;
+  const msg = event.data;
+  if (msg?.type === "sg-vote-result" && msg.domain === currentTabHostname) {
+    closeVoteIframe();
+    if (msg.ok) {
+      updateVoteStatus(msg.action);
+      showReportMsg(`✓ ${msg.action === 'report' ? 'Report' : 'Vouch'} submitted`, "text-green");
+      setTimeout(() => showReportMsg("", ""), 3000);
+      lookupCurrentDomain();
+    }
+  }
+});
+
+// ── Also listen for results via chrome.runtime (fallback for external window) ──
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "vote-result" && msg.ok && msg.domain === currentTabHostname) {
     updateVoteStatus(msg.action);

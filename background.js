@@ -63,6 +63,55 @@ chrome.runtime.onMessageExternal.addListener(async (msg, sender) => {
   // Only accept messages from the ScamGuard website
   if (!sender.url || !sender.url.startsWith(UM_CONFIG.SITE_URL)) return;
 
+  // ── Vote submission: background worker makes the API call so it
+  //    survives even if the popup (and its iframe) closes mid-flight.
+  if (msg.type === 'submit-vote' && msg.domain && msg.action && msg.turnstileToken) {
+    try {
+      const res = await fetch(`${UM_CONFIG.SITE_URL}/api/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: msg.domain,
+          action: msg.action,
+          turnstileToken: msg.turnstileToken,
+        }),
+        credentials: 'include',
+      });
+      const result = await res.json();
+
+      if (result.ok) {
+        // If queued, poll for completion
+        if (result.queued && result.executionId) {
+          for (let i = 0; i < 20; i++) {
+            await new Promise(r => setTimeout(r, 500));
+            try {
+              const poll = await fetch(
+                `${UM_CONFIG.SITE_URL}/api/vote?executionId=${encodeURIComponent(result.executionId)}`,
+                { credentials: 'include' }
+              );
+              const pollData = await poll.json();
+              if (pollData.done) break;
+              if (!pollData.ok || !pollData.pending) break;
+            } catch { break; }
+          }
+        }
+
+        // Update local vote cache & notify popup
+        const localVotes = await chrome.storage.local.get('userVotes');
+        const votes = localVotes.userVotes || {};
+        votes[msg.domain] = msg.action;
+        await chrome.storage.local.set({ userVotes: votes });
+
+        chrome.runtime.sendMessage({
+          type: 'vote-result', ok: true, domain: msg.domain, action: msg.action,
+        }).catch(() => {});
+      }
+    } catch (err) {
+      console.error('[ScamGuard BG] Vote submission failed:', err);
+    }
+    return;
+  }
+
   if (msg.type === "vote-result" && msg.ok && msg.domain && msg.action) {
     // Update local vote cache
     const localVotes = await chrome.storage.local.get("userVotes");

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://nyc.cloud.appwrite.io; img-src 'self' data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://nyc.cloud.appwrite.io; img-src 'self' data:; frame-src https://sg.crystaljake.com;">
   <title>ScamGuard</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -293,6 +293,45 @@
       vertical-align: middle;
     }    /* ── Hidden helper ─────────────────────── */
     .hidden { display: none !important; }
+    /* ── Vote iframe overlay ────────────────── */
+    .vote-iframe-wrap {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+    .vote-iframe-wrap.active { display: flex; }
+    .vote-iframe-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .vote-iframe-bar span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+    .vote-iframe-bar button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .vote-iframe-bar button:hover { color: var(--text); background: var(--bg-elevated); }
+    .vote-iframe-wrap iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -339,6 +378,15 @@
     <span class="user-text" id="user-area">
       <a href="https://sg.crystaljake.com" target="_blank" class="btn-link" style="font-size:10px">ScamGuard Web</a>
     </span>
+  </div>
+
+  <!-- ═══ Vote iframe overlay ═══ -->
+  <div id="vote-iframe-wrap" class="vote-iframe-wrap">
+    <div class="vote-iframe-bar">
+      <span id="vote-iframe-title">Vote</span>
+      <button id="vote-iframe-close" title="Close">&times;</button>
+    </div>
+    <iframe id="vote-iframe" title="Vote" src="about:blank"></iframe>
   </div>
 
   <script src="config.js"></script>
